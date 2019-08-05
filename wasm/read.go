@@ -56,7 +56,7 @@ func readBytesUint(r io.Reader) ([]byte, error) {
 	return readBytes(r, n)
 }
 
-func readUtf8String(r io.Reader, n uint32) (string, error) {
+func readUTF8String(r io.Reader, n uint32) (string, error) {
 	bytes, err := readBytes(r, n)
 	if err != nil {
 		return "", err
@@ -67,12 +67,12 @@ func readUtf8String(r io.Reader, n uint32) (string, error) {
 	return string(bytes), nil
 }
 
-func readUtf8StringUint(r io.Reader) (string, error) {
+func readUTF8StringUint(r io.Reader) (string, error) {
 	n, err := leb128.ReadVarUint32(r)
 	if err != nil {
 		return "", err
 	}
-	return readUtf8String(r, n)
+	return readUTF8String(r, n)
 }
 
 func readU32(r io.Reader) (uint32, error) {
