@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/ontio/wagon/exec"
-	"github.com/ontio/wagon/wasm"
+	"github.com/go-interpreter/wagon/exec"
+	"github.com/go-interpreter/wagon/wasm"
 )
 
 // this file is based on github.com/perlin-network/life/spec/test_runner/runner.go
@@ -77,23 +76,11 @@ func (c *Config) Run(cfgPath string) {
 				log.Fatalf("could not read module: %v", err)
 			}
 
-			memLimits := uint64(math.MaxUint32)
-			if m.Memory != nil && len(m.Memory.Entries) > 0 && m.Memory.Entries[0].Limits.Flags == 1 {
-				max := m.Memory.Entries[0].Limits.Maximum
-				if max != 160 { // currently max memory size for ontology vm
-					memLimits = uint64(max) * 65536
-				}
-			}
-
-			vm, err = exec.NewVM(m, memLimits)
+			vm, err = exec.NewVM(m)
 			if err != nil {
 				panic(fmt.Errorf("l%d: %s, could not create VM: %v", cmd.Line, cfgPath, err))
 			}
-			GasLimit := uint64(10000000000)
-			ExecStep := uint64(1000000000000)
 			vm.RecoverPanic = true
-			vm.ExecMetrics = &exec.Gas{GasPrice: 1, GasLimit: &GasLimit, GasFactor: 5, ExecStep: &ExecStep}
-			vm.CallStackDepth = 10000
 			if cmd.Name != "" {
 				namedVMs[cmd.Name] = vm
 			}
@@ -122,7 +109,6 @@ func (c *Config) Run(cfgPath string) {
 					fmt.Sscanf(arg.Value, "%d", &val)
 					args = append(args, val)
 				}
-				fmt.Printf("Entry = %d, len(args) = %d\n", entryID, len(args))
 				ret, err := localVM.ExecCode(int64(entryID), args...)
 				if err != nil {
 					panic(err)
@@ -187,7 +173,6 @@ func (c *Config) Run(cfgPath string) {
 					fmt.Sscanf(arg.Value, "%d", &val)
 					args = append(args, val)
 				}
-				fmt.Printf("Entry = %d, len(args) = %d\n", entryID, len(args))
 				_, err := localVM.ExecCode(int64(entryID), args...)
 				if err == nil {
 					panic(fmt.Errorf("L%d: %s, expect a trap\n", cmd.Line, cfgPath))

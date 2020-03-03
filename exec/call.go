@@ -6,7 +6,8 @@ package exec
 
 import (
 	"errors"
-	"github.com/ontio/wagon/wasm"
+
+	"github.com/go-interpreter/wagon/wasm"
 )
 
 var (

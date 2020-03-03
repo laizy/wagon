@@ -11,6 +11,16 @@ import (
 	"reflect"
 )
 
+type OutsizeError struct {
+	ImmType string
+	Size    uint64
+	Max     uint64
+}
+
+func (e OutsizeError) Error() string {
+	return fmt.Sprintf("validate: %s size overflow (%v), max (%v)", e.ImmType, e.Size, e.Max)
+}
+
 type InvalidTableIndexError uint32
 
 func (e InvalidTableIndexError) Error() string {
@@ -222,8 +232,8 @@ func (m *Module) populateTables() error {
 		} else {
 			for i, index := range elem.Elems {
 				table[offset+uint32(i)] = TableEntry{Index: index, Initialized: true}
+			}
 		}
-	}
 	}
 
 	logger.Printf("There are %d entries in the table index space.", len(m.TableIndexSpace))
@@ -240,7 +250,7 @@ func (m *Module) GetTableElement(index int) (uint32, error) {
 	entry := m.TableIndexSpace[0][index]
 	if !entry.Initialized {
 		return 0, UninitializedTableEntryError(index)
-}
+	}
 
 	return entry.Index, nil
 }

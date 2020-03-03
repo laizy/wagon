@@ -210,7 +210,10 @@ func (vm *VM) growMemory() {
 	curLen := len(vm.memory) / wasmPageSize
 	n := vm.popUint32()
 
-	if uint64(n+uint32(len(vm.memory)/wasmPageSize)) > 1<<16 || uint64(len(vm.memory))+uint64(n*wasmPageSize) > vm.MemoryLimitation {
+	maxMem := vm.module.Memory.Entries[0].Limits.Maximum
+	newPage := uint64(n + uint32(len(vm.memory)/wasmPageSize))
+
+	if newPage > 1<<16 || newPage > uint64(maxMem) {
 		vm.pushInt32(-1)
 		return
 	}
