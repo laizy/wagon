@@ -207,16 +207,19 @@ func (vm *VM) Memory() []byte {
 	return vm.memory
 }
 
-func (vm *VM) GetExportIndex(name string) (uint32, bool) {
+// GetExportEntry returns ExportEntry of this VM's Wasm module.
+func (vm *VM) GetExportEntry(name string) (wasm.ExportEntry, bool) {
 	entry, ok := vm.module.Export.Entries[name]
-	if ok {
-		return entry.Index, true
-	}
-
-	return 0, false
+	return entry, ok
 }
 
-func (vm *VM) GetGlobal(index uint32) (uint64, bool) {
+// GetGlobal returns the global value represented as uint64 defined in this VM's Wasm module.
+func (vm *VM) GetGlobal(name string) (uint64, bool) {
+	entry, ok := vm.GetExportEntry(name)
+	if !ok {
+		return 0, false
+	}
+	index := entry.Index
 	if int64(index) >= int64(len(vm.globals)) {
 		return 0, false
 	}

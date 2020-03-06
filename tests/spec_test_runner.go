@@ -1,3 +1,6 @@
+// Copyright 2020 The go-interpreter Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 package main
 
 import (
@@ -99,7 +102,7 @@ func (c *Config) Run(cfgPath string) {
 
 			switch cmd.Action.Type {
 			case "invoke":
-				entryID, ok := localVM.GetExportIndex(cmd.Action.Field)
+				entryID, ok := localVM.GetExportEntry(cmd.Action.Field)
 				if !ok {
 					panic("export not found (func)")
 				}
@@ -109,7 +112,7 @@ func (c *Config) Run(cfgPath string) {
 					fmt.Sscanf(arg.Value, "%d", &val)
 					args = append(args, val)
 				}
-				ret, err := localVM.ExecCode(int64(entryID), args...)
+				ret, err := localVM.ExecCode(int64(entryID.Index), args...)
 				if err != nil {
 					panic(err)
 				}
@@ -129,11 +132,7 @@ func (c *Config) Run(cfgPath string) {
 					}
 				}
 			case "get":
-				globalID, ok := localVM.GetExportIndex(cmd.Action.Field)
-				if !ok {
-					panic("export not found (global)")
-				}
-				val, ok := localVM.GetGlobal(globalID)
+				val, ok := localVM.GetGlobal(cmd.Action.Field)
 				if !ok {
 					panic("export not found (global)")
 				}
@@ -163,7 +162,7 @@ func (c *Config) Run(cfgPath string) {
 			}
 			switch cmd.Action.Type {
 			case "invoke":
-				entryID, ok := localVM.GetExportIndex(cmd.Action.Field)
+				entryID, ok := localVM.GetExportEntry(cmd.Action.Field)
 				if !ok {
 					panic("export not found (func)")
 				}
@@ -173,7 +172,7 @@ func (c *Config) Run(cfgPath string) {
 					fmt.Sscanf(arg.Value, "%d", &val)
 					args = append(args, val)
 				}
-				_, err := localVM.ExecCode(int64(entryID), args...)
+				_, err := localVM.ExecCode(int64(entryID.Index), args...)
 				if err == nil {
 					panic(fmt.Errorf("L%d: %s, expect a trap\n", cmd.Line, cfgPath))
 				}
