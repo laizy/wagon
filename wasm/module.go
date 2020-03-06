@@ -70,7 +70,7 @@ type Module struct {
 	}
 }
 
-// TableEntry represents a table index and tracking it's initialized state.
+// TableEntry represents a table index and tracks its initialized state.
 type TableEntry struct {
 	Index       uint32
 	Initialized bool
